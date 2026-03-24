@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Button, Text, TextInput, Modal, Portal, ActivityIndicator } from 'react-native-paper';
+import { Button, Text, TextInput, Modal, Portal, ActivityIndicator, Snackbar, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { recipeService } from '../../services/api';
+import { spacing } from '../../theme/spacing';
 
 export default function AddScreen() {
+  const theme = useTheme();
   const router = useRouter();
   const [text, setText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState<string | null>(null);
 
   const handleManual = () => {
     router.push('/add/manual');
@@ -31,14 +34,14 @@ export default function AddScreen() {
       setText('');
     } catch (error) {
       console.error(error);
-      alert('Failed to parse recipe');
+      setSnackbar('Failed to parse recipe. Check your connection and try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
         <Text variant="headlineMedium" style={styles.header}>Add New Recipe</Text>
         
@@ -72,8 +75,15 @@ export default function AddScreen() {
       </View>
 
       <Portal>
-        <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.modal}>
-          <Text variant="titleLarge">Paste Recipe Text</Text>
+        <Modal
+          visible={modalVisible}
+          onDismiss={() => setModalVisible(false)}
+          contentContainerStyle={[styles.modal, { backgroundColor: theme.colors.surface }]}
+        >
+          <Text variant="titleLarge">Paste recipe text</Text>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            Demo parse (no real AI). URLs are not supported — paste ingredients and steps as text.
+          </Text>
           <TextInput
             mode="outlined"
             multiline
@@ -93,6 +103,14 @@ export default function AddScreen() {
           </Button>
         </Modal>
       </Portal>
+      <Snackbar
+        visible={!!snackbar}
+        onDismiss={() => setSnackbar(null)}
+        duration={4000}
+        action={{ label: 'Dismiss', onPress: () => setSnackbar(null) }}
+      >
+        {snackbar}
+      </Snackbar>
     </SafeAreaView>
   );
 }
@@ -100,29 +118,27 @@ export default function AddScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: spacing.lg,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
-    gap: 16,
+    gap: spacing.lg,
   },
   header: {
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: spacing.xxl,
   },
   button: {
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
   },
   modal: {
-    backgroundColor: 'white',
-    padding: 20,
-    margin: 20,
+    padding: spacing.xl,
+    margin: spacing.lg,
     borderRadius: 8,
-    gap: 16,
+    gap: spacing.lg,
   },
   input: {
     maxHeight: 200,
-  }
+  },
 });

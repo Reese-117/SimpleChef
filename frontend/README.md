@@ -1,6 +1,12 @@
-# Welcome to your Expo app 👋
+# SimpleChef frontend (Expo)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is an [Expo](https://expo.dev) app using file-based routing ([Expo Router](https://docs.expo.dev/router/introduction/)).
+
+## API and auth
+
+- Set `EXPO_PUBLIC_API_URL` to your backend base URL including `/api/v1` (e.g. `http://localhost:8000/api/v1`). If unset, dev builds infer the host from Metro.
+- The Axios client attaches `Authorization: Bearer <token>` when logged in.
+- **401 handling:** Invalid or expired JWT responses clear the stored token via `logout()`. `AuthSessionSync` then redirects from protected routes to `/login`. **403** responses (e.g. not allowed to edit another user’s recipe) are **not** treated as session expiry and do not log the user out.
 
 ## Get started
 

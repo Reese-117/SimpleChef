@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
+import { TextInput, Button, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { authService } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
+import { spacing } from '../theme/spacing';
 
 export default function LoginScreen() {
+  const theme = useTheme();
   const router = useRouter();
   const setToken = useAuthStore((s) => s.setToken);
   const [email, setEmail] = useState('');
@@ -38,13 +40,15 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.content}
       >
         <Text variant="headlineMedium" style={styles.title}>SimpleChef</Text>
-        <Text variant="bodyLarge" style={styles.subtitle}>Sign in to continue</Text>
+        <Text variant="bodyLarge" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
+          Sign in to continue
+        </Text>
 
         <TextInput
           label="Email"
@@ -93,34 +97,32 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
-    padding: 24,
+    padding: spacing.xl,
     justifyContent: 'center',
   },
   title: {
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
     fontWeight: 'bold',
   },
   subtitle: {
     textAlign: 'center',
-    marginBottom: 32,
-    opacity: 0.7,
+    marginBottom: spacing.xxl,
   },
   input: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   error: {
     color: '#b00020',
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   button: {
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   link: {
-    marginTop: 16,
+    marginTop: spacing.lg,
   },
 });

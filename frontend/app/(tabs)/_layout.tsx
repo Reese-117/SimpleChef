@@ -19,6 +19,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
+          tabBarAccessibilityLabel: 'Home tab',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="home" size={24} color={color} />,
         }}
       />
@@ -26,6 +27,7 @@ export default function TabLayout() {
         name="calendar"
         options={{
           title: 'Calendar',
+          tabBarAccessibilityLabel: 'Calendar tab',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
         }}
       />
@@ -33,6 +35,7 @@ export default function TabLayout() {
         name="add"
         options={{
           title: 'Add',
+          tabBarAccessibilityLabel: 'Add recipe tab',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="plus-circle" size={32} color={color} />,
           tabBarLabel: () => null, // Hide label for prominent button
         }}
@@ -41,6 +44,7 @@ export default function TabLayout() {
         name="grocery"
         options={{
           title: 'Grocery',
+          tabBarAccessibilityLabel: 'Grocery tab',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cart" size={24} color={color} />,
         }}
       />
@@ -48,6 +52,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
+          tabBarAccessibilityLabel: 'Profile tab',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" size={24} color={color} />,
         }}
       />

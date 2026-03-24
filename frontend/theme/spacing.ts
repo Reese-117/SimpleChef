@@ -1,0 +1,12 @@
+/**
+ * Spacing scale for consistent layout (4pt base).
+ * Use these instead of arbitrary pixel values.
+ */
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 24,
+  xxl: 32,
+} as const;

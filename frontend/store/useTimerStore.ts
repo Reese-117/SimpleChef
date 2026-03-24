@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import * as Haptics from 'expo-haptics';
 
 export interface Timer {
   id: string;
@@ -36,10 +37,18 @@ export const useTimerStore = create<TimerState>((set, get) => ({
     )
   })),
   tick: () => set((state) => ({
-    timers: state.timers.map(t => {
+    timers: state.timers.map((t) => {
       if (t.status !== 'running') return t;
-      if (t.remaining <= 0) return { ...t, status: 'completed' };
-      return { ...t, remaining: t.remaining - 1 };
-    })
-  }))
+      const next = t.remaining - 1;
+      if (next <= 0) {
+        try {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } catch {
+          /* no-op on web / unsupported */
+        }
+        return { ...t, remaining: 0, status: 'completed' as const };
+      }
+      return { ...t, remaining: next };
+    }),
+  })),
 }));

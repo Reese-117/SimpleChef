@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SectionList } from 'react-native';
-import { Text, Checkbox, FAB, List, TextInput, Modal, Portal, Button } from 'react-native-paper';
+import { View, StyleSheet, SectionList, Share } from 'react-native';
+import { Text, Checkbox, FAB, List, TextInput, Modal, Portal, Button, IconButton, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { groceryService } from '../../services/api';
+import { spacing } from '../../theme/spacing';
 
 export default function GroceryScreen() {
+  const theme = useTheme();
   const [items, setItems] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [itemName, setItemName] = useState('');
   const [sections, setSections] = useState<any[]>([]);
+  const [merging, setMerging] = useState(false);
 
   useEffect(() => {
     loadList();
@@ -40,14 +43,51 @@ export default function GroceryScreen() {
   };
 
   const toggleItem = async (id: number, currentStatus: boolean) => {
+    const next = !currentStatus;
+    const prevItems = items;
+    const optimistic = items.map((i) => (i.id === id ? { ...i, is_checked: next } : i));
+    setItems(optimistic);
+    groupItems(optimistic);
     try {
-      await groceryService.updateItem(id, { is_checked: !currentStatus });
-      // Optimistic update
-      const newItems = items.map(i => i.id === id ? { ...i, is_checked: !currentStatus } : i);
-      setItems(newItems);
-      groupItems(newItems);
+      await groceryService.updateItem(id, { is_checked: next });
     } catch (error) {
       console.error(error);
+      setItems(prevItems);
+      groupItems(prevItems);
+    }
+  };
+
+  const mergeFromPlan = async () => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 7);
+    const fmt = (d: Date) => d.toISOString().split('T')[0];
+    setMerging(true);
+    try {
+      await groceryService.mergeFromPlan(fmt(start), fmt(end));
+      await loadList();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setMerging(false);
+    }
+  };
+
+  const shareList = async () => {
+    try {
+      const text = await groceryService.exportText();
+      await Share.share({ message: text, title: 'Grocery list' });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const removeItem = async (id: number) => {
+    try {
+      await groceryService.deleteItem(id);
+      loadList();
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -68,8 +108,20 @@ export default function GroceryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text variant="headlineMedium" style={styles.header}>Grocery List</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.toolbar}>
+        <Text variant="headlineSmall" style={styles.header}>
+          Grocery list
+        </Text>
+        <View style={styles.toolbarBtns}>
+          <Button mode="outlined" compact onPress={mergeFromPlan} loading={merging} disabled={merging}>
+            From plan
+          </Button>
+          <Button mode="text" compact onPress={shareList}>
+            Share
+          </Button>
+        </View>
+      </View>
       
       <SectionList
         sections={sections}
@@ -84,10 +136,21 @@ export default function GroceryScreen() {
                 onPress={() => toggleItem(item.id, item.is_checked)}
               />
             )}
+            right={() => (
+              <IconButton icon="delete-outline" onPress={() => removeItem(item.id)} accessibilityLabel={`Delete ${item.name}`} />
+            )}
           />
         )}
         renderSectionHeader={({ section: { title } }) => (
-          <Text variant="titleSmall" style={styles.sectionHeader}>{title}</Text>
+          <Text
+            variant="titleSmall"
+            style={[
+              styles.sectionHeader,
+              { backgroundColor: theme.colors.surfaceVariant, color: theme.colors.onSurfaceVariant },
+            ]}
+          >
+            {title}
+          </Text>
         )}
         contentContainerStyle={styles.list}
       />
@@ -100,7 +163,11 @@ export default function GroceryScreen() {
       />
 
       <Portal>
-        <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.modal}>
+        <Modal
+          visible={modalVisible}
+          onDismiss={() => setModalVisible(false)}
+          contentContainerStyle={[styles.modal, { backgroundColor: theme.colors.surface }]}
+        >
           <Text variant="titleLarge">Add Item</Text>
           <TextInput label="Item Name" value={itemName} onChangeText={setItemName} />
           <Button mode="contained" onPress={addItem}>Add</Button>
@@ -113,31 +180,37 @@ export default function GroceryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+  },
+  toolbar: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
   },
   header: {
-    padding: 16,
-    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
+  toolbarBtns: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   list: {
     paddingBottom: 80,
   },
   sectionHeader: {
-    backgroundColor: '#f0f0f0',
-    padding: 8,
+    padding: spacing.sm,
     fontWeight: 'bold',
   },
   fab: {
     position: 'absolute',
-    margin: 16,
+    margin: spacing.lg,
     right: 0,
     bottom: 0,
   },
   modal: {
-    backgroundColor: 'white',
-    padding: 20,
-    margin: 20,
+    padding: spacing.xl,
+    margin: spacing.lg,
     borderRadius: 8,
-    gap: 16,
-  }
+    gap: spacing.lg,
+  },
 });
