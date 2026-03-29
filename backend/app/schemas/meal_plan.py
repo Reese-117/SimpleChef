@@ -26,3 +26,13 @@ class MealPlan(MealPlanBase):
 
     class Config:
         from_attributes = True
+
+
+class PlannerDaySummary(BaseModel):
+    """Aggregates logged calories for a single calendar day (meal rows only)."""
+
+    date: date
+    consumed_calories: int
+    meal_count: int
+    meals_with_calories_logged: int
+    meals_without_calories: int

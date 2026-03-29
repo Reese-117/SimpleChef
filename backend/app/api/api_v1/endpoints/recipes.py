@@ -1,5 +1,6 @@
 from typing import Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
@@ -21,12 +22,21 @@ def read_recipes(
     q: Optional[str] = None,
     difficulty: Optional[str] = None,
     tag: Optional[str] = None,
+    max_total_minutes: Optional[int] = None,
+    tags_all: Optional[str] = Query(
+        None,
+        description="Comma-separated tags; recipe must contain every tag (e.g. dietary filters).",
+    ),
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Recipes owned by the current user or marked public.
-    Optional filters: title search (`q`), exact `difficulty`, JSONB `tags` contains `tag`.
+    Optional filters: title search (`q`), exact `difficulty`, JSONB `tags` contains `tag`,
+    `max_total_minutes` (prep + cook), `tags_all` (AND match on tag strings).
     """
+    tags_list: Optional[List[str]] = None
+    if tags_all and tags_all.strip():
+        tags_list = [s.strip() for s in tags_all.split(",") if s.strip()]
     return crud.recipe.get_multi_for_user(
         db,
         user_id=current_user.id,
@@ -35,6 +45,8 @@ def read_recipes(
         q=q,
         difficulty=difficulty,
         tag=tag,
+        max_total_minutes=max_total_minutes,
+        tags_all=tags_list,
     )
 
 

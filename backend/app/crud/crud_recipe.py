@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 from app.models.recipe import Recipe, Ingredient, Step
@@ -36,6 +36,8 @@ class CRUDRecipe:
         q: Optional[str] = None,
         difficulty: Optional[str] = None,
         tag: Optional[str] = None,
+        max_total_minutes: Optional[int] = None,
+        tags_all: Optional[List[str]] = None,
     ) -> List[Recipe]:
         """Recipes owned by user or marked public, with optional filters."""
         qry = db.query(Recipe).filter(
@@ -47,6 +49,16 @@ class CRUDRecipe:
             qry = qry.filter(Recipe.difficulty == difficulty.strip())
         if tag and tag.strip():
             qry = qry.filter(Recipe.tags.contains([tag.strip()]))
+        if max_total_minutes is not None and max_total_minutes >= 0:
+            total_mins = func.coalesce(Recipe.prep_time_minutes, 0) + func.coalesce(
+                Recipe.cook_time_minutes, 0
+            )
+            qry = qry.filter(total_mins <= max_total_minutes)
+        if tags_all:
+            for t in tags_all:
+                tt = t.strip()
+                if tt:
+                    qry = qry.filter(Recipe.tags.contains([tt]))
         return (
             qry.order_by(Recipe.id.desc()).offset(skip).limit(limit).all()
         )

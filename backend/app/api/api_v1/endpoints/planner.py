@@ -6,6 +6,7 @@ from datetime import date
 from app import crud, models, schemas
 from app.api import deps
 from app.models.meal_plan import MealPlan
+from app.services.planner_summary import compute_planner_day_summary
 
 router = APIRouter()
 
@@ -21,6 +22,24 @@ def _meal_plan_to_schema(p: MealPlan) -> schemas.MealPlan:
         calories=p.calories,
         recipe_title=p.recipe.title if p.recipe else None,
     )
+
+
+@router.get("/day-summary", response_model=schemas.PlannerDaySummary)
+def read_planner_day_summary(
+    date: date,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Sum `calories` on meal plan rows for the given day (null calories excluded from sum).
+    Compare `consumed_calories` to `GET /users/me` `calorie_goal` on the client.
+    """
+    plans = (
+        db.query(MealPlan)
+        .filter(MealPlan.user_id == current_user.id, MealPlan.date == date)
+        .all()
+    )
+    return compute_planner_day_summary(date, plans)
 
 
 @router.get("/", response_model=List[schemas.MealPlan])
