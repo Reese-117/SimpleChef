@@ -1,5 +1,7 @@
 # SimpleChef Progress Report (Rough Draft)
 
+**Note:** The canonical IEEE LaTeX submission is a **single file**: `Latex/main.tex` (see `Latex/README.md`). This Markdown draft may be out of date; align narrative with `main.tex` and repository docs under `docs/`.
+
 **Group Name:** [Your Group Name]  
 **Date:** March 22, 2026  
 **Course:** Human-Computer Interaction  

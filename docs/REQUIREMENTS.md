@@ -27,7 +27,7 @@ SimpleChef is a mobile-first cooking assistant designed to reduce friction in th
   - **Manual Edit:** Full control over all fields.
 
 ### 2.3. Cooking Mode (Core Feature)
-- Step-by-step navigation.
+- Step-by-step navigation
 - **Mise en Place:** Checklist of ingredients specific to the current step.
 - **Timers:**
   - Integrated timers within steps.

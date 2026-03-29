@@ -19,35 +19,468 @@
 Email: [contact email]}}
 
 \begin{document}
+\graphicspath{{figures/}}
 \maketitle
 
 \begin{abstract}
-This progress report summarizes development of SimpleChef, a mobile-first cooking assistant built with React Native (Expo), FastAPI, and PostgreSQL. We describe objectives aligned with our earlier proposal, implemented features as of March~22,~2026, known gaps relative to the proposed interface, ongoing design and engineering challenges, evidence placeholders for screenshots, remaining work, workflow and architecture figures, and an updated milestone timeline toward final delivery.
+This progress report summarizes development of SimpleChef, a mobile-first cooking assistant built with React Native (Expo), FastAPI, and PostgreSQL. We describe objectives aligned with our project proposal, \textbf{implemented features as of March~28,~2026}, including a \textbf{controller-based frontend architecture} that separates application logic from presentation for alignment with Figma-first UI work. We reference consolidated repository documentation (requirements traceability, API contract, Figma UI system requirements, and backend refinement notes) rather than duplicating those specifications here. \textbf{Implementation evidence} shows high-fidelity phone-aspect UI designs (Section~\ref{sec:evidence}); these screens are \textbf{not yet wired to the live API} in the design tool, but the \textbf{backend endpoints exist} for each flow, and connection is planned through the existing controller hooks. We summarize ongoing gaps, remaining work, workflow and architecture figures, and an updated milestone timeline toward final delivery.
 \end{abstract}
 
 \section{Project Overview}
-\input{sec-overview}
+SimpleChef is a mobile-first cooking assistant designed to reduce friction across the entire cooking process---from discovering a recipe to meal planning and grocery shopping. The tagline \emph{Your calm kitchen companion} reflects the goal of a capable, calm tool that streamlines everyday cooking tasks.
+
+As stated in our project proposal, many cooking apps fragment the experience: recipes in one place, calories in another, grocery lists on paper or in notes. Instructions often appear as long blocks of text, and timers frequently push users out of the recipe context. SimpleChef targets a single cohesive flow: recipe discovery, step-by-step cooking with integrated timers, meal planning with calorie awareness, and grocery support. The design applies HCI ideas including progressive disclosure, clarity over clutter, and smart defaults with full user control~\cite{preece2015,hartson2012ux}.
+
+\subsection{Objectives (aligned with the proposal)}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Unify the workflow} across browsing, cooking mode, planning, and groceries with consistent navigation and data flow.
+  \item \textbf{Optimize step-by-step cooking} so each step is scannable during active cooking, with integrated timers and mise en place tied to steps where modeled.
+  \item \textbf{Timer management} via a timer dock that surfaces active timers without leaving the cooking context.
+  \item \textbf{Grocery automation} from planned meals (deduplication, categories, merge from plan, export).
+  \item \textbf{Lower recipe input friction} via manual entry plus AI-assisted text parsing with verification before save; image and video import remain planned.
+  \item \textbf{Meal planning and calorie goals} by assigning meals to days, day-level calorie summaries vs.\ profile goals, and recipe filters (API); richer statistics are extensions.
+  \item \textbf{Iterate with users} through feedback sessions and refinement of flows and visuals~\cite{nielsen1994heuristic}.
+\end{itemize}
+
+\subsection{Tools and technology}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Frontend:} React Native (Expo). Routes under \texttt{frontend/app/}; \textbf{application logic} is centralized in \texttt{frontend/controllers/} (hooks such as \texttt{useRecipeLibraryController}, \texttt{usePlannerController}, \texttt{useGroceryController}) so screens stay presentation-focused and can be mirrored in Figma without duplicating API rules. Shared DTOs live in \texttt{frontend/types/}; HTTP and auth live in \texttt{frontend/services/api.ts}.
+  \item \textbf{Backend:} FastAPI (Python) with SQLAlchemy models and Alembic migrations; JWT auth for protected routes (\texttt{backend/app/api/}).
+  \item \textbf{Data store:} PostgreSQL (via Docker Compose for local development).
+  \item \textbf{Design:} Figma for wireframes and high-fidelity exploration~\cite{figma2026help}; repository documentation (Section~\ref{sec:repo-docs}) lists every named UI/API requirement for annotation without duplicating them in this PDF.
+  \item \textbf{AI/ML:} Text parsing uses a structured placeholder/demo path (\texttt{backend/app/services/ai\_service.py}) with validation (\texttt{recipe\_parse\_validation}); production LLM/vision is not required for the current milestone.
+\end{itemize}
+
+\section{Repository documentation (single source of truth)}
+\label{sec:repo-docs}
+Detailed specifications are maintained under \texttt{docs/} and \texttt{frontend/} in the repository. \textbf{The PDF does not duplicate them}; cite or link these paths in appendices and team notes.
+
+\begin{table}[!htb]
+\centering
+\caption{Key documentation files (relative to repository root).}
+\label{tab:docs}
+\footnotesize
+\begin{tabular}{@{}p{0.28\columnwidth}p{0.66\columnwidth}@{}}
+\toprule
+\textbf{Artifact} & \textbf{Purpose} \\
+\midrule
+Figma UI requirements & Global UX, screen tables, consolidated checklist (proposal + Prompt + SRS + checklist), data fields, states, deferrals. Path: \texttt{docs/FIGMA\_UI\_...}. \\
+Traceability matrix & SRS/proposal $\rightarrow$ endpoints and status. \texttt{docs/REQ\_...}. \\
+API contract & Query params, filters, planner day summary. \texttt{docs/API.md}. \\
+Architecture & Auth/ownership, \textbf{frontend layering}. \texttt{docs/ARCHITECTURE.md}. \\
+Backend refinement & Design debt and suggested refactors. \texttt{docs/BACKEND\_...}. \\
+SRS \& backlog & \texttt{docs/REQUIREMENTS.md}, \texttt{CONTINUATION\_CHECKLIST.md}. \\
+Frontend guides & Controller pattern, design tokens. \texttt{frontend/README.md}, \texttt{frontend/DESIGN\_SYSTEM.md}. \\
+\bottomrule
+\end{tabular}
+\end{table}
+\normalsize
 
 \section{Project Progress Overview}
-\input{sec-progress}
+As of March~28,~2026, the team has working vertical slices: an Expo client, FastAPI API, and PostgreSQL database support authenticated use of the main tabs and core flows described in the proposal. The frontend follows a \textbf{controller layer}: route files bind UI to hooks that encapsulate loading state, validation, and service calls.
+
+\subsection{Completed milestones and components}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Proposal and design specification:} Scope, problem statement, five-tab UI (Home, Calendar, Add, Grocery, Profile), wireframe, and timeline documented.
+  \item \textbf{Backend foundation:} Application entry (\texttt{main.py}, \texttt{run.py}), models for users, recipes (ingredients, steps), meal plans, grocery lists/items, and versioned migrations.
+  \item \textbf{Authentication:} Signup and login; JWT via Axios interceptor (\texttt{frontend/services/api.ts}); recipe visibility and ownership enforced server-side (see \texttt{docs/ARCHITECTURE.md}).
+  \item \textbf{Recipe library (Home):} Debounced search, difficulty chips, \texttt{RecipeList} fed by \texttt{useRecipeLibraryController}; API supports additional filters (\texttt{max\_total\_minutes}, \texttt{tags\_all}) for future UI.
+  \item \textbf{Recipe detail:} Hero image or placeholder, summary stats, expandable ingredients, steps; \textbf{Begin Cooking}; add to calendar modal; owner edit/delete.
+  \item \textbf{Cooking mode:} Step navigation, progress, mise en place per step (ingredient--step linking), timer dock (\texttt{TimerDock}, \texttt{useTimerStore}), optional per-step timers, ``all ingredients'' modal, keep-awake when profile requests it.
+  \item \textbf{Add recipe:} Manual form with dynamic rows; paste flow calls \texttt{POST /recipes/parse} and opens verification on the manual screen. Image scan remains disabled (\emph{Coming Soon}).
+  \item \textbf{Meal planner:} Month grid, selected day, meals list, quick add, add from recipe library with meal type, delete; \texttt{GET /planner/day-summary} supports consumed calories vs.\ profile goal on the calendar screen.
+  \item \textbf{Grocery list:} Sectioned list, checkbox sync, manual add, \textbf{merge from meal plan} (date range), share/export text.
+  \item \textbf{Profile:} Edit name, bio, calorie goal, dietary restrictions (comma-separated), keep-screen-on toggle; save via \texttt{PATCH /users/me}; friends/social explicitly out of scope for this build.
+\end{itemize}
+
+\subsection{Gaps relative to the proposed UI and SRS}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Home:} Filter drawer (cook time, profile-default dietary tags) not fully exposed in UI though API supports several query parameters.
+  \item \textbf{Cooking mode:} Prompt/proposal describe replacing the bottom tab bar with cooking-specific chrome; current app keeps stack navigation inside the tab shell---documented as a delta in \texttt{docs/FIGMA\_UI\_SYSTEM\_REQUIREMENTS.md}.
+  \item \textbf{Calendar:} Month indicators (dots/images per day), color coding by meal type, and statistics charts are not implemented.
+  \item \textbf{Grocery:} Full inline editor and drag-to-reorder categories are not implemented; merge and check-off work.
+  \item \textbf{AI parsing:} Demo/placeholder parser, not a production LLM or vision pipeline.
+  \item \textbf{Friends / social:} Out of scope per backlog; proposal text remains for future product direction.
+\end{itemize}
 
 \section{Ongoing Challenges and Design Difficulties}
-\input{sec-challenges}
+\subsection{Closing the loop among meal plans, recipes, and groceries}
+The proposal promises a grocery list grounded in planned meals. A \texttt{POST /grocery/from-plan} merge path aggregates ingredients from planned recipes in a date range; users can still edit items manually. Further polish: servings scaling rules, richer unit normalization, and optional source-recipe tags in the list UI.
+
+\subsection{Search, filter, and dietary personalization}
+Server-side filters exist; the Home UI should expose time caps and tag filters aligned with profile dietary strings to limit choice overload on Home~\cite{hartson2012ux}.
+
+\subsection{Mise en place and step granularity}
+Ingredients can link to steps; the cooking screen shows global prep on step one and step-linked items thereafter. Parsing quality and editor UX for linking remain improvement areas.
+
+\subsection{Trustworthy AI parsing}
+A mock parser can mislead participants about accuracy. A real text parser behind the same verify-and-edit screen, with image/video clearly labeled beta, remains a priority~\cite{nielsen1994heuristic}.
+
+\subsection{Calendar information density}
+Month grid exists; richer at-a-glance indicators and proposal-style bottom sheet are partial. Usability tests should compare taps-to-complete for ``add from library.''
+
+\subsection{Engineering and maintainability}
+Cross-cutting concerns (authorization, validation boundaries, service vs.\ router responsibilities) are recorded in \texttt{docs/BACKEND\_REFINEMENT\_NOTES.md} for future refactors without blocking feature delivery.
 
 \section{Implementation Evidence}
-\input{sec-evidence}
+\label{sec:evidence}
+
+The following figures are \textbf{high-fidelity UI designs} (phone aspect ratio) captured for this report. They are organized by feature area (e.g. profile, login, home, etc.). These designs are not yet connected to the running backend in the main repo as there is still some refinement to be done, but the backend is set up with specific exposed APIs so it is very easy to connect and modify the frontend. \textbf{For every screen shown below, a corresponding backend already exists} in the repository (e.g., auth, recipes, planner, etc.) which is all documented in our shared repository. Because of this no new architectural pattern is required, all we have to so is write each view to the appropriate controller and DTO types, which is much more simple than having to rewrite large connections.
+
+\vspace {.5cm}
+
+\textbf{Authentication (sign-in and registration) - } This page has two main sections, one for returning users and the other for new users. Users will remain logged in when the app is closed, but when they are using a new device they will have to log in still, hence why a login screen is present. For new users there is a page to create an account, which only requires the simple info typical of a login screen. In the future, we may add a next step to this new user account creation that will consist of a walkthrough of the app's functions and a prompt to enter other account details (e.g. goals, dietary restrictions, etc.), making this lead into onboarding rather than just throwing new users into the app.
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[!htbp]{0.46\linewidth}\centering
+\includegraphics[width=\linewidth]{auth/login.png}\\[0.15em]
+\scriptsize Login
+\end{minipage}
+\begin{minipage}[!htbp]{0.46\linewidth}\centering
+\includegraphics[width=\linewidth]{auth/create-account.png}\\[0.15em]
+\scriptsize Create account
+\end{minipage}
+\caption{Authentication: email/password login and account creation. }
+\label{fig:auth}
+\end{figure}
+
+\newpage
+\textbf{Home (recipe library) - }This page is the home screen which consists of a list of recipes viewable by scrolling, this list can be filtered by a variety of tags which can be applied to recipes for easier searching. These tags are a stand in for now, but in later implementations they will likely be based on tags already one existing food so there is no redundancy.
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[!htbp]{0.35\linewidth}\centering
+\includegraphics[width=\linewidth]{home/home.png}\\[0.15em]
+\scriptsize Home (library)
+\end{minipage}
+\begin{minipage}[!htbp]{0.35\linewidth}\centering
+\includegraphics[width=\linewidth]{home/home-filter.png}\\[0.15em]
+\scriptsize Search and filter chips
+\end{minipage}
+\caption{Home screen: List of recipes and filter menu.}
+\label{fig:home}
+\end{figure}
+
+\textbf{Recipe detail - } The following is what a user sees when a recipe is clicked, it contains a short overview of the recipe along with everything the user would need before starting the recipe. The user can also edit and remove this recipe from this submenu with the icons in the top right, and go back to the home screen with the arrow in the top left. The edit menu is the same as the recipe creation menu which will be seen shortly.
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[!htbp]{0.35\linewidth}\centering
+\includegraphics[width=\linewidth]{home/recipe-top.png}\\[0.15em]
+\scriptsize Recipe detail (top)
+\end{minipage}
+\begin{minipage}[!htbp]{0.35\linewidth}\centering
+\includegraphics[width=\linewidth]{home/recipe-bottom.png}\\[0.15em]
+\scriptsize Recipe detail (bottom)
+\end{minipage}
+\caption{Recipe detail (scroll): summary, ingredients, and actions. Controller: \texttt{useRecipeDetailController}. API: \texttt{GET /recipes/\{id\}}.}
+\label{fig:recipe-detail}
+\end{figure}
+
+\newpage
+\textbf{Help / instructions - } The following is still very much a work in progress, but it is the guided recipe screen a user will see when a recipe is started. There are buttons at the bottom to see progress and go forward or back, along with an indicator of progress. The timer button is visible in the instructions and when started appears at the bottom, which can be used to pause or cancel the timer. The button in the top right can be selected to see all the ingredients for the recipe. This is one of many iterations of these menus, and there are likely going to be a few more until we land on a final product.
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[!htbp]{0.32\linewidth}\centering
+\includegraphics[width=\linewidth]{home/instructions.png}\\[0.15em]
+\scriptsize Instructions (full screen)
+\end{minipage}
+\begin{minipage}[!htbp]{0.32\linewidth}\centering
+\includegraphics[width=\linewidth]{home/instructions-modal.png}\\[0.15em]
+\scriptsize Instructions (modal)
+\end{minipage}
+\caption{Onboarding or help for library search and filters (draft labels). Not tied to a single API route; supports discoverability on Home.}
+\label{fig:filters-help}
+\end{figure}
+
+\textbf{Calender - } This page contains the calendar for the month, and is the main way to plan recipes/meals for the user. Days can be selected by clicking on them, and the current day is selected by default. When meals are added to a day they are shown via dots on the selected day, and when the day is selected the meals and calories are shown.
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[!htbp]{0.32\linewidth}\centering
+\includegraphics[width=\linewidth]{calendar/calendar.png}\\[0.15em]
+\scriptsize Month grid
+\end{minipage}
+\begin{minipage}[!htbp]{0.32\linewidth}\centering
+\includegraphics[width=\linewidth]{calendar/calendar-day-selected.png}\\[0.15em]
+\scriptsize Day selected
+\end{minipage}
+\caption{Calendar: month overview and highlighted date.}
+\label{fig:calendar-month}
+\end{figure}
+
+\newpage
+\textbf{Empty day/Adding meal - } The first image is what appears when a day with nothign planned is slected, prompting the user to select a meal. The second image is the modal that appears when the add meal button is selected providing the options to select a recipe from the user library, or to input a custom food (e.g. a snack, or a purchased meal).
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[!htbp]{0.32\linewidth}\centering
+\includegraphics[width=\linewidth]{calendar/calendar-empty.png}\\[0.15em]
+\scriptsize Empty day
+\end{minipage}
+\begin{minipage}[!htbp]{0.32\linewidth}\centering
+\includegraphics[width=\linewidth]{calendar/calender-add-modal.png}\\[0.15em]
+\scriptsize Add meal (planner modal)
+\end{minipage}
+\caption{Planner: empty day and add-meal dialog. }
+\label{fig:planner-day}
+\end{figure}
+
+\textbf{Add recipe - } This is where a user will input a recipe, right now there are only two options, but hopefully in the future we can add more options to input recipes. The main and only functional method right now is manually entering the recipe which is done with the latter 2 images. The first image is the soon to be implemented ai parsing of a recipe which will (hopefully) use AI/ML to parse inputed text into a recipe that can then be edited and saved.
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[!htbp]{0.31\linewidth}\centering
+\includegraphics[width=\linewidth]{add/ai.png}\\[0.15em]
+\scriptsize Add recipe (paste / AI)
+\end{minipage}\hfill
+\begin{minipage}[!htbp]{0.31\linewidth}\centering
+\includegraphics[width=\linewidth]{add/manual-bottom.png}\\[0.15em]
+\scriptsize Manual entry (bottom)
+\end{minipage}\hfill
+\begin{minipage}[!htbp]{0.31\linewidth}\centering
+\includegraphics[width=\linewidth]{add/manual-top.png}\\[0.15em]
+\scriptsize Manual entry (top)
+\end{minipage}
+\caption{Add recipe: import entry point and manual create/edit form. Controllers: \texttt{useAddRecipeController}, \texttt{useManualRecipeController}. API: \texttt{POST /recipes/parse}, \texttt{POST /recipes/}, \texttt{PUT /recipes/\{id\}}.}
+\label{fig:add-recipe}
+\end{figure}
+
+\newpage
+\textbf{Grocery list---main views.} Sectioned list with items and checkboxes versus an empty-state prompt before items exist.
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[!htbp]{0.32\linewidth}\centering
+\includegraphics[width=\linewidth]{grocery/list.png}\\[0.15em]
+\scriptsize Grocery list
+\end{minipage}
+\begin{minipage}[!htbp]{0.32\linewidth}\centering
+\includegraphics[width=\linewidth]{grocery/empty.png}\\[0.15em]
+\scriptsize Empty grocery
+\end{minipage}
+\caption{Grocery list: populated categories and empty state. Controller: \texttt{useGroceryController}. API: \texttt{GET /grocery/}.}
+\label{fig:grocery-list}
+\end{figure}
+
+\textbf{Grocery---modals.} Manual line-item entry and merging ingredient demand from the meal plan into the list for a date range.
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[!htbp]{0.32\linewidth}\centering
+\includegraphics[width=\linewidth]{grocery/add-modal.png}\\[0.15em]
+\scriptsize Add grocery item
+\end{minipage}
+\begin{minipage}[!htbp]{0.32\linewidth}\centering
+\includegraphics[width=\linewidth]{grocery/merge-modal.png}\\[0.15em]
+\scriptsize Merge from plan
+\end{minipage}
+\caption{Grocery: add-item sheet and merge-from-plan confirmation. API: \texttt{POST /grocery/items}, \texttt{POST /grocery/from-plan}.}
+\label{fig:grocery-modals}
+\end{figure}
+
+\newpage
+\textbf{Profile and sign-out.} Editable goals and preferences (scrolled), and a confirmation when ending the session.
+
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[!htbp]{0.31\linewidth}\centering
+\includegraphics[width=\linewidth]{profile/profile-top.png}\\[0.15em]
+\scriptsize Profile (top)
+\end{minipage}\hfill
+\begin{minipage}[!htbp]{0.31\linewidth}\centering
+\includegraphics[width=\linewidth]{profile/profile-bottom.png}\\[0.15em]
+\scriptsize Profile (bottom)
+\end{minipage}\hfill
+\begin{minipage}[!htbp]{0.31\linewidth}\centering
+\includegraphics[width=\linewidth]{profile/sign_out-modal.png}\\[0.15em]
+\scriptsize Sign out confirmation
+\end{minipage}
+\caption{Profile: account fields, goals, and dietary options; sign-out dialog. Controller: \texttt{useProfileController}. API: \texttt{GET/PATCH /users/me}.}
+\label{fig:profile}
+\end{figure}
+
+Optional: include a repository URL or short demo video link in the final PDF footer or abstract footnote.
 
 \section{Future Work and To-Do}
-\input{sec-future}
+Remaining work is grouped by horizon. Table~\ref{tab:near} lists near-term tasks; Table~\ref{tab:mid} covers mid-term polish; Table~\ref{tab:course} lists course deliverables.
+
+\begin{table}[!htbp]
+\centering
+\caption{Near-term tasks (late March--April).}
+\label{tab:near}
+\begin{tabular}{@{}p{0.28\textwidth}p{0.62\textwidth}@{}}
+\toprule
+\textbf{Task} & \textbf{Notes} \\
+\midrule
+Expose Home time/tag filters in UI & API ready; align with profile dietary defaults. \\
+Month calendar indicators + statistics & Dots/trends per proposal; optional charts. \\
+Replace mock AI parser & Keep verify-and-edit UX; improve extraction and errors. \\
+Figma high-fi + navigation delta & Cooking chrome vs.\ tabs; see Figma requirements doc. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\caption{Mid-term tasks (proposal Weeks~5--7 and polish).}
+\label{tab:mid}
+\begin{tabular}{@{}p{0.28\textwidth}p{0.62\textwidth}@{}}
+\toprule
+\textbf{Task} & \textbf{Notes} \\
+\midrule
+Image / video import & OCR or model pipeline; loading and failure states. \\
+Grocery inline edit + reorder & Persisted ordering if required by product. \\
+Optional statistics & Trends vs.\ goals using meal logs. \\
+Friends / sharing & If in scope: APIs and UI. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\caption{Course deliverables tied to evaluation and documentation.}
+\label{tab:course}
+\begin{tabular}{@{}p{0.28\textwidth}p{0.62\textwidth}@{}}
+\toprule
+\textbf{Task} & \textbf{Notes} \\
+\midrule
+Usability testing & Task scripts: browse, cook with timers, plan, grocery. \\
+Heuristic and accessibility pass & Contrast, touch targets, legibility while cooking~\cite{wcag21}. \\
+Final demo and report & Live demo, design rationale, user analysis per syllabus. \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Project Plan and Concept}
-\input{sec-workflow}
+Figure~\ref{fig:flow} summarizes primary user journeys in the current build; dashed arrows indicate partial or planned flows. Figure~\ref{fig:arch} shows the high-level system context.
+
+\begin{figure*}[!htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\footnotesize,
+  box/.style={rectangle, draw, rounded corners, minimum width=2.15cm, minimum height=0.65cm, align=center},
+  planned/.style={rectangle, draw, dashed, rounded corners, minimum width=2.0cm, minimum height=0.55cm, align=center},
+  arr/.style={-{Latex[length=1.8mm]}, thick}
+]
+  \node[box] (launch) {Launch app};
+  \node[box, below=0.5cm of launch] (auth) {Authenticated?};
+  \node[box, below left=0.6cm and 0.2cm of auth] (login) {Login / signup};
+  \node[box, below right=0.6cm and 0.2cm of auth] (home) {Home:\\recipe library};
+  \draw[arr] (launch) -- (auth);
+  \draw[arr] (auth) -- node[left, xshift=-0.05cm] {\scriptsize no} (login);
+  \draw[arr] (auth) -- node[right, xshift=0.05cm] {\scriptsize yes} (home);
+  \draw[arr] (login) |- (home);
+
+  \node[box, below=0.55cm of home] (detail) {Recipe detail};
+  \node[box, below=0.45cm of detail] (cook) {Step-by-step\\cooking};
+  \node[box, below=0.4cm of cook] (dock) {Timer dock};
+  \draw[arr] (home) -- (detail);
+  \draw[arr] (detail) -- (cook);
+  \draw[arr] (cook) -- (dock);
+
+  \node[box, left=1.8cm of detail] (add) {Add recipe};
+  \node[box, below=0.4cm of add] (manual) {Manual entry};
+  \node[box, below=0.35cm of manual] (parse) {Paste $\rightarrow$ parse API};
+  \node[planned, below=0.35cm of parse] (img) {Image scan\\(planned)};
+  \draw[arr] (home) -- (add);
+  \draw[arr] (add) -- (manual);
+  \draw[arr] (add) -- (parse);
+  \draw[arr] (parse) -- (manual);
+  \draw[arr, dashed] (add) -- (img);
+
+  \node[box, right=1.8cm of detail] (cal) {Calendar tab};
+  \node[box, below=0.4cm of cal] (meals) {Meals for date};
+  \node[box, below=0.35cm of meals] (quick) {Quick add\\name + kcal};
+  \node[box, below=0.35cm of quick] (lib) {Add from library};
+  \draw[arr] (home) -- (cal);
+  \draw[arr] (cal) -- (meals);
+  \draw[arr] (meals) -- (quick);
+  \draw[arr] (meals) -- (lib);
+
+  \node[box, right=0.9cm of cook] (groc) {Grocery tab};
+  \node[box, below=0.4cm of groc] (guse) {Check / manual add};
+  \node[box, below=0.35cm of guse] (sync) {Merge from plan};
+  \draw[arr] (home) -- (groc);
+  \draw[arr] (groc) -- (guse);
+  \draw[arr] (guse) -- (sync);
+
+  \node[box, below=1.1cm of home] (prof) {Profile};
+  \node[box, below=0.4cm of prof] (pview) {Goals + restrictions};
+  \node[box, below=0.35cm of pview] (edit) {Save / keep-awake};
+  \draw[arr] (home) -- (prof);
+  \draw[arr] (prof) -- (pview);
+  \draw[arr] (pview) -- (edit);
+\end{tikzpicture}%
+}
+\caption{User flow emphasizing implemented paths; dashed nodes are planned or partial.}
+\label{fig:flow}
+\end{figure*}
+
+\begin{figure}[!htbp]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}[
+  font=\small,
+  srv/.style={rectangle, draw, minimum width=2.4cm, minimum height=0.9cm, align=center},
+  future/.style={rectangle, draw, dashed, minimum width=2.2cm, minimum height=0.75cm, align=center},
+  arr/.style={-{Latex[length=2mm]}, thick}
+]
+  \node[srv] (rn) {React Native\\(Expo)};
+  \node[srv, right=1.6cm of rn] (api) {FastAPI};
+  \node[srv, right=1.4cm of api] (db) {PostgreSQL};
+  \node[future, below=0.55cm of api] (ai) {AI parsing\\(future)};
+  \draw[arr] (rn) -- node[above, font=\scriptsize] {HTTP/JSON} (api);
+  \draw[arr] (api) -- (db);
+  \draw[arr, dashed] (api) -- (ai);
+\end{tikzpicture}%
+}
+\caption{System context: mobile client, API layer, database; optional AI service for parsing.}
+\label{fig:arch}
+\end{figure}
 
 \section{Project Progress Timeline}
-\input{sec-timeline}
+Table~\ref{tab:gantt} summarizes major phases and status. Dates are illustrative for Spring~2026; adjust to your group's actual calendar.
+
+\begin{table*}[!htbp]
+\centering
+\caption{Milestone summary (Spring 2026, indicative dates).}
+\label{tab:gantt}
+\begin{tabular}{@{}p{0.34\textwidth}p{0.12\textwidth}p{0.18\textwidth}p{0.28\textwidth}@{}}
+\toprule
+\textbf{Phase / task} & \textbf{Status} & \textbf{Span (approx.)} & \textbf{Notes} \\
+\midrule
+Proposal and wireframe & Done & Feb 1--14 & Scope and specs \\
+Repository docs (Figma req., traceability, arch.) & Done & Mar 20--28 & Single sources under \texttt{docs/} \\
+Frontend controller layer & Done & Mar 20--28 & \texttt{frontend/controllers/} \\
+Backend API and database & Done & Feb 15--Mar 7 & Models, migrations, routers \\
+Auth and profile & Done & Feb 20--Mar 28 & JWT, \texttt{/users/me}, PATCH profile \\
+Recipe library and detail & Done & Feb 25--Mar 10 & List, detail, filters (API) \\
+Cooking mode and timer dock & Done & Mar 1--Mar 14 & Steps, mise, timers \\
+Add recipe (manual + parse) & Done & Mar 5--Mar 15 & Verify-and-edit path \\
+Meal plan API and calendar UI & Done & Mar 8--Mar 28 & Grid, library add, day summary \\
+Grocery list + merge from plan & Done & Mar 10--Mar 28 & Sections, merge, share \\
+\midrule
+Figma high-fi + filter UI parity & Active & Mar 22--Apr 10 & Match \texttt{FIGMA\_UI\_...} \\
+Real AI text parsing & Planned & Mar 25--Apr 8 & Replace mock service \\
+Month indicators + statistics UI & Planned & Apr 1--Apr 20 & Proposal polish \\
+\midrule
+Usability tests on build & Planned & Apr 5--Apr 15 & Scripted tasks \\
+Heuristics and accessibility & Planned & Apr 12--Apr 20 & WCAG-oriented fixes~\cite{wcag21} \\
+Final demo preparation & Planned & Apr 18--Apr 28 & Presentation and polish \\
+Final documentation deadline & Milestone & May 3 & Final report (syllabus) \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{Risks}
+Parser quality and advanced planner/grocery UX depend on continued parallel API work with Figma prototypes; documentation in \texttt{docs/} reduces rework between design and implementation.
 
 \section{Conclusion}
-\input{sec-conclusion}
+SimpleChef has moved from design specification to a \textbf{functional prototype} with a documented separation between \textbf{presentation} (Expo routes and components) and \textbf{application logic} (controller hooks), backed by a traceable API and SRS mapping. The \textbf{figures in Section~\ref{sec:evidence}} document the intended high-fidelity UI; where those designs are not yet connected to the API, \textbf{backend support and controller wiring} provide a direct path to integration. Authenticated users can browse and filter recipes (with further UI exposure planned), inspect detail, run step-by-step cooking with a timer dock and mise en place, add recipes manually or via parse-then-edit, plan meals on a monthly calendar with day-level calorie summaries, merge groceries from plans, and edit profile settings. Remaining gaps versus the full proposal include richer Home filters in the UI, calendar visual density and statistics, production-grade parsing, grocery inline editing and reorder, optional social features, and evaluation activities (usability testing, heuristic review, accessibility) ahead of final delivery. All named requirements for Figma and implementation are consolidated in \texttt{docs/FIGMA\_UI\_SYSTEM\_REQUIREMENTS.md} and \texttt{docs/REQUIREMENTS\_TRACEABILITY.md}.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
