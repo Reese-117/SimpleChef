@@ -51,6 +51,19 @@ export default function CalendarScreen() {
               accessibilityLabel={`Select day ${cellData.day}`}
             >
               <Text variant="bodyMedium">{cellData.day}</Text>
+              {c.mealCountForDay(cellData.day) > 0 ? (
+                <View style={styles.markerRow}>
+                  {c.mealCountForDay(cellData.day) <= 3 ? (
+                    Array.from({ length: c.mealCountForDay(cellData.day) }).map((_, markerIndex) => (
+                      <View key={markerIndex} style={[styles.markerDot, { backgroundColor: theme.colors.primary }]} />
+                    ))
+                  ) : (
+                    <Text variant="labelSmall" style={[styles.markerPlus, { color: theme.colors.primary }]}>
+                      {c.mealCountForDay(cellData.day)}
+                    </Text>
+                  )}
+                </View>
+              ) : null}
             </Pressable>
           ) : (
             <View key={idx} style={{ width: c.cell, height: c.cell * 0.85 }} />
@@ -171,6 +184,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
+  },
+  markerRow: {
+    marginTop: 3,
+    minHeight: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  markerDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 999,
+  },
+  markerPlus: {
+    lineHeight: 10,
+    fontWeight: '700',
   },
   selectedLabel: {
     paddingHorizontal: spacing.lg,

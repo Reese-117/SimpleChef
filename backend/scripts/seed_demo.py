@@ -18,7 +18,7 @@ from app.schemas.user import UserCreate
 def main() -> None:
     db = SessionLocal()
     try:
-        email = "demo@simplechef.local"
+        email = "demo@simplechef.real"
         user = crud.user.get_by_email(db, email=email)
         if not user:
             user = crud.user.create(
@@ -48,9 +48,9 @@ def main() -> None:
             difficulty="Easy",
             tags=["vegetarian", "quick"],
             ingredients=[
-                IngredientCreate(name="Pasta", quantity=250, unit="g", step_order_index=2),
+                IngredientCreate(name="Pasta", quantity=250, unit="g"),
                 IngredientCreate(name="Olive oil", quantity=1, unit="tbsp"),
-                IngredientCreate(name="Tomatoes", quantity=2, unit="pcs", step_order_index=2),
+                IngredientCreate(name="Tomatoes", quantity=2, unit="pcs"),
             ],
             steps=[
                 StepCreate(order_index=1, instruction="Boil salted water for pasta.", timer_seconds=300),

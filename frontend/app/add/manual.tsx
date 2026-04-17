@@ -1,6 +1,15 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import { TextInput, Button, Text, IconButton, Divider, Snackbar, useTheme } from 'react-native-paper';
+import {
+  TextInput,
+  Button,
+  Text,
+  IconButton,
+  Divider,
+  Snackbar,
+  Menu,
+  useTheme,
+} from 'react-native-paper';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { spacing } from '../../theme/spacing';
@@ -8,6 +17,7 @@ import { useManualRecipeController } from '../../controllers';
 
 export default function ManualEntryScreen() {
   const theme = useTheme();
+  const [difficultyMenuVisible, setDifficultyMenuVisible] = React.useState(false);
   const { initialData, editId } = useLocalSearchParams<{
     initialData?: string;
     editId?: string;
@@ -34,6 +44,44 @@ export default function ManualEntryScreen() {
           <TextInput label="Cook (min)" value={c.cookTime} onChangeText={c.setCookTime} style={[styles.input, styles.half]} keyboardType="numeric" />
         </View>
         <TextInput label="Servings" value={c.servings} onChangeText={c.setServings} style={styles.input} keyboardType="numeric" />
+        <Text variant="labelLarge" style={styles.fieldLabel}>Difficulty</Text>
+        <Menu
+          visible={difficultyMenuVisible}
+          onDismiss={() => setDifficultyMenuVisible(false)}
+          anchor={
+            <Button
+              mode="outlined"
+              icon="chevron-down"
+              style={styles.input}
+              contentStyle={styles.dropdownButtonContent}
+              onPress={() => setDifficultyMenuVisible(true)}
+            >
+              {c.difficulty}
+            </Button>
+          }
+        >
+          <Menu.Item
+            onPress={() => {
+              c.setDifficulty('Easy');
+              setDifficultyMenuVisible(false);
+            }}
+            title="Easy"
+          />
+          <Menu.Item
+            onPress={() => {
+              c.setDifficulty('Medium');
+              setDifficultyMenuVisible(false);
+            }}
+            title="Medium"
+          />
+          <Menu.Item
+            onPress={() => {
+              c.setDifficulty('Hard');
+              setDifficultyMenuVisible(false);
+            }}
+            title="Hard"
+          />
+        </Menu>
         <TextInput
           label="Tags (comma-separated)"
           value={c.tagsText}
@@ -132,6 +180,12 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: spacing.md,
+  },
+  fieldLabel: {
+    marginBottom: spacing.xs,
+  },
+  dropdownButtonContent: {
+    justifyContent: 'space-between',
   },
   row: {
     flexDirection: 'row',

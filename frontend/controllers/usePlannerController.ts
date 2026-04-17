@@ -18,6 +18,10 @@ export function toISODate(d: Date) {
   return d.toISOString().split('T')[0];
 }
 
+function endOfMonth(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+}
+
 export function usePlannerController() {
   const [viewMonth, setViewMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(() => toISODate(new Date()));
@@ -31,6 +35,7 @@ export function usePlannerController() {
   const [loadingRecipes, setLoadingRecipes] = useState(false);
   const [pickMealType, setPickMealType] = useState<string>('Dinner');
   const [calorieGoal, setCalorieGoal] = useState<number | null>(null);
+  const [mealCountsByDate, setMealCountsByDate] = useState<Record<string, number>>({});
 
   const year = viewMonth.getFullYear();
   const month = viewMonth.getMonth();
@@ -56,6 +61,22 @@ export function usePlannerController() {
     }
   }, [selectedDate]);
 
+  const loadMonthMealCounts = useCallback(async () => {
+    try {
+      const start = toISODate(startOfMonth(viewMonth));
+      const end = toISODate(endOfMonth(viewMonth));
+      const monthPlans: MealPlanDto[] = await plannerService.getPlans(start, end);
+      const counts = monthPlans.reduce<Record<string, number>>((acc, plan) => {
+        acc[plan.date] = (acc[plan.date] || 0) + 1;
+        return acc;
+      }, {});
+      setMealCountsByDate(counts);
+    } catch (error) {
+      console.error(error);
+      setMealCountsByDate({});
+    }
+  }, [viewMonth]);
+
   const loadDaySummary = useCallback(async () => {
     try {
       const s = await plannerService.getDaySummary(selectedDate);
@@ -70,6 +91,10 @@ export function usePlannerController() {
     loadPlans();
     loadDaySummary();
   }, [loadPlans, loadDaySummary]);
+
+  useEffect(() => {
+    loadMonthMealCounts();
+  }, [loadMonthMealCounts]);
 
   useEffect(() => {
     userService
@@ -91,6 +116,7 @@ export function usePlannerController() {
       setCalories('');
       await loadPlans();
       await loadDaySummary();
+      await loadMonthMealCounts();
     } catch (error) {
       console.error(error);
     }
@@ -107,6 +133,7 @@ export function usePlannerController() {
       setLibraryOpen(false);
       await loadPlans();
       await loadDaySummary();
+      await loadMonthMealCounts();
     } catch (e) {
       console.error(e);
     }
@@ -130,6 +157,7 @@ export function usePlannerController() {
       await plannerService.deletePlan(id);
       await loadPlans();
       await loadDaySummary();
+      await loadMonthMealCounts();
     } catch (e) {
       console.error(e);
     }
@@ -147,6 +175,10 @@ export function usePlannerController() {
 
   const prevMonth = () => setViewMonth(new Date(year, month - 1, 1));
   const nextMonth = () => setViewMonth(new Date(year, month + 1, 1));
+  const mealCountForDay = (day: number) => {
+    const dateKey = toISODate(new Date(year, month, day));
+    return mealCountsByDate[dateKey] || 0;
+  };
 
   return {
     viewMonth,
@@ -177,6 +209,7 @@ export function usePlannerController() {
     isSelected,
     prevMonth,
     nextMonth,
+    mealCountForDay,
     MEAL_TYPES,
     calorieGoal,
   };

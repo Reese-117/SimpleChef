@@ -85,14 +85,21 @@ class CRUDRecipe:
         db.commit() # Commit to get ID
         db.refresh(db_obj)
 
-        for ingredient in ingredients_data:
-            db_ingredient = Ingredient(**ingredient, recipe_id=db_obj.id)
-            db.add(db_ingredient)
-        
         for step in steps_data:
             db_step = Step(**step, recipe_id=db_obj.id)
             db.add(db_step)
-            
+
+        db.flush()
+        steps_by_order = _steps_order_to_id_map(db, db_obj.id)
+        for ingredient in ingredients_data:
+            db.add(
+                _ingredient_from_payload(
+                    ingredient,
+                    recipe_id=db_obj.id,
+                    steps_by_order=steps_by_order,
+                )
+            )
+
         db.commit()
         db.refresh(db_obj)
         return db_obj

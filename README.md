@@ -32,11 +32,21 @@ A smart cooking assistant app.
    ```bash
    docker compose up -d
    ```
-5. Run Migrations:
+5. Set up postgres:
+   ```bash
+   sudo su - postgres
+   createuser -s postgres
+   ```
+6. Start local DB:
+   ```bash
+   createdb -U postgres simplechef
+   ```
+
+7. Run Migrations:
    ```bash
    alembic upgrade head
    ```
-6. Start Server:
+8. Start Server:
    ```bash
    python run.py
    ```

@@ -15,6 +15,8 @@ export type ManualStepRow = {
   timer_seconds: string;
 };
 
+const DIFFICULTIES = ['Easy', 'Medium', 'Hard'] as const;
+
 export function useManualRecipeController(
   initialData: string | undefined,
   editId: string | undefined
@@ -24,6 +26,7 @@ export function useManualRecipeController(
   const [prepTime, setPrepTime] = useState('');
   const [cookTime, setCookTime] = useState('');
   const [servings, setServings] = useState('');
+  const [difficulty, setDifficulty] = useState<(typeof DIFFICULTIES)[number]>('Medium');
   const [tagsText, setTagsText] = useState('');
   const [ingredients, setIngredients] = useState<ManualIngredientRow[]>([
     { name: '', quantity: '', unit: '', stepOrder: '' },
@@ -45,6 +48,14 @@ export function useManualRecipeController(
         data.cook_time_minutes != null ? String(data.cook_time_minutes) : ''
       );
       setServings(data.servings != null ? String(data.servings) : '');
+      const incomingDifficulty = String(data.difficulty || '').trim();
+      const normalizedDifficulty =
+        incomingDifficulty.charAt(0).toUpperCase() + incomingDifficulty.slice(1).toLowerCase();
+      setDifficulty(
+        DIFFICULTIES.includes(normalizedDifficulty as (typeof DIFFICULTIES)[number])
+          ? (normalizedDifficulty as (typeof DIFFICULTIES)[number])
+          : 'Medium'
+      );
       setTagsText(Array.isArray(data.tags) ? (data.tags as string[]).join(', ') : '');
       const ing = data.ingredients as unknown[] | undefined;
       setIngredients(
@@ -86,6 +97,14 @@ export function useManualRecipeController(
         setPrepTime(data.prep_time_minutes?.toString() || '');
         setCookTime(data.cook_time_minutes?.toString() || '');
         setServings(data.servings?.toString() || '');
+        const incomingDifficulty = String(data.difficulty || '').trim();
+        const normalizedDifficulty =
+          incomingDifficulty.charAt(0).toUpperCase() + incomingDifficulty.slice(1).toLowerCase();
+        setDifficulty(
+          DIFFICULTIES.includes(normalizedDifficulty as (typeof DIFFICULTIES)[number])
+            ? (normalizedDifficulty as (typeof DIFFICULTIES)[number])
+            : 'Medium'
+        );
         setTagsText(Array.isArray(data.tags) ? data.tags.join(', ') : '');
         setSteps(
           data.steps?.length
@@ -168,6 +187,7 @@ export function useManualRecipeController(
         prep_time_minutes: parseInt(prepTime, 10) || 0,
         cook_time_minutes: parseInt(cookTime, 10) || 0,
         servings: parseInt(servings, 10) || 1,
+        difficulty,
         tags,
         ingredients: ingredients.map((i) => {
           const so = String(i.stepOrder || '').trim();
@@ -212,6 +232,8 @@ export function useManualRecipeController(
     setCookTime,
     servings,
     setServings,
+    difficulty,
+    setDifficulty,
     tagsText,
     setTagsText,
     ingredients,
