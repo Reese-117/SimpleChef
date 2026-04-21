@@ -1,0 +1,12 @@
+@import 'tailwindcss' source(none);
+@source '../**/*.{js,ts,jsx,tsx}';
+
+@import 'tw-animate-css';
+
+/* Sonner toast close button positioning */
+[data-sonner-toast] [data-close-button] {
+  left: auto !important;
+  right: 0.75rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
