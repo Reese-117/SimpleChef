@@ -52,10 +52,19 @@ A smart cooking assistant app.
    ```
    API will be available at `http://localhost:8000`. Docs at `http://localhost:8000/docs`.
 
-### Frontend
-1. Navigate to `frontend`:
+
+
+
+
+
+
+
+
+
+### Frontend 
+1. Navigate to `figma_design`:
    ```bash
-   cd frontend
+   cd figma_design
    ```
 2. Install dependencies:
    ```bash
@@ -63,9 +72,8 @@ A smart cooking assistant app.
    ```
 3. Start Expo:
    ```bash
-   npx expo start
+   npm run dev
    ```
-   Scan the QR code with Expo Go app or press `a` for Android emulator / `w` for Web.
 
 ## Environment variables
 
