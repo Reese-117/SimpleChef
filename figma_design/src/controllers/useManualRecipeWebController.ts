@@ -25,6 +25,7 @@ export function useManualRecipeWebController(
   const [prepTime, setPrepTime] = useState('');
   const [cookTime, setCookTime] = useState('');
   const [servings, setServings] = useState('');
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
@@ -47,6 +48,12 @@ export function useManualRecipeWebController(
       setPrepTime(data.prep_time_minutes != null ? String(data.prep_time_minutes) : '');
       setCookTime(data.cook_time_minutes != null ? String(data.cook_time_minutes) : '');
       setServings(data.servings != null ? String(data.servings) : '');
+      const parsedDifficulty = String((data.difficulty as string) || 'Medium').trim().toLowerCase();
+      setDifficulty(
+        parsedDifficulty === 'easy' || parsedDifficulty === 'hard' || parsedDifficulty === 'medium'
+          ? parsedDifficulty
+          : 'medium'
+      );
       setCalories(data.total_calories != null ? String(data.total_calories) : '');
       setProtein(data.protein_grams != null ? String(data.protein_grams) : '');
       setCarbs(data.carbs_grams != null ? String(data.carbs_grams) : '');
@@ -93,6 +100,12 @@ export function useManualRecipeWebController(
         setPrepTime(data.prep_time_minutes?.toString() || '');
         setCookTime(data.cook_time_minutes?.toString() || '');
         setServings(data.servings?.toString() || '');
+        const parsedDifficulty = String(data.difficulty || 'Medium').trim().toLowerCase();
+        setDifficulty(
+          parsedDifficulty === 'easy' || parsedDifficulty === 'hard' || parsedDifficulty === 'medium'
+            ? parsedDifficulty
+            : 'medium'
+        );
         setCalories(data.total_calories?.toString() || '');
         setProtein(data.protein_grams?.toString() || '');
         setCarbs(data.carbs_grams?.toString() || '');
@@ -183,6 +196,7 @@ export function useManualRecipeWebController(
         prep_time_minutes: parseInt(prepTime, 10) || 0,
         cook_time_minutes: parseInt(cookTime, 10) || 0,
         servings: parseInt(servings, 10) || 1,
+        difficulty: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
         total_calories: parseInt(calories, 10) || null,
         protein_grams: parseInt(protein, 10) || null,
         carbs_grams: parseInt(carbs, 10) || null,
@@ -232,6 +246,8 @@ export function useManualRecipeWebController(
     setCookTime,
     servings,
     setServings,
+    difficulty,
+    setDifficulty,
     calories,
     setCalories,
     protein,

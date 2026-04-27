@@ -10,6 +10,7 @@ import { Label } from '../components/ui/label';
 import { ArrowLeft, FileText, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 export default function AddRecipe() {
   const [searchParams] = useSearchParams();
@@ -142,6 +143,19 @@ export default function AddRecipe() {
                     value={manual.servings}
                     onChange={(e) => manual.setServings(e.target.value)}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Difficulty</Label>
+                  <Select value={manual.difficulty} onValueChange={(v) => manual.setDifficulty(v as 'easy' | 'medium' | 'hard')}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select difficulty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="easy">Easy</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="hard">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">

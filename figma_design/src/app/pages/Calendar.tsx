@@ -229,7 +229,7 @@ export default function Calendar() {
       </Dialog>
 
       <Dialog open={c.libraryOpen} onOpenChange={c.setLibraryOpen}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-h-[85vh] overflow-y-auto no-scrollbar">
           {c.pendingRecipe ? (
             <>
               <DialogHeader>
@@ -295,7 +295,7 @@ export default function Calendar() {
                   ))}
                 </div>
               </div>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
+              <div className="space-y-2 max-h-64 overflow-y-auto no-scrollbar">
                 {c.loadingRecipes ? (
                   <p className="text-sm text-muted-foreground">Loading recipes…</p>
                 ) : (

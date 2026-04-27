@@ -68,7 +68,7 @@ export default function CookingMode() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto px-4 py-6 min-h-0">
+      <div className="flex-1 overflow-auto no-scrollbar px-4 py-6 min-h-0">
         <div className="max-w-2xl mx-auto space-y-6">
           <Card>
             <CardContent className="p-6">
@@ -92,7 +92,7 @@ export default function CookingMode() {
           {miseItems.length > 0 && (
             <Card>
               <CardContent className="p-4">
-                <h4 className="mb-3">Mise en place</h4>
+                <h4 className="mb-3">Ingredients</h4>
                 <ul className="space-y-2">
                   {miseItems.map((ing) => (
                     <li key={ing.id} className="flex items-start gap-2">
@@ -113,6 +113,8 @@ export default function CookingMode() {
         </div>
       </div>
 
+      <CookingTimerDock />
+
       <div className="border-t border-border bg-card px-4 py-3 flex justify-between gap-3 shrink-0">
         <Button variant="outline" type="button" disabled={currentStepIndex === 0} onClick={c.prevStep}>
           <ChevronLeft className="w-4 h-4 mr-1" />
@@ -124,14 +126,12 @@ export default function CookingMode() {
         </Button>
       </div>
 
-      <CookingTimerDock />
-
       <Dialog open={c.allIngOpen} onOpenChange={c.setAllIngOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>All ingredients</DialogTitle>
           </DialogHeader>
-          <ul className="space-y-2 max-h-80 overflow-y-auto">
+          <ul className="space-y-2 max-h-80 overflow-y-auto no-scrollbar">
             {ingredients.map((ing) => (
               <li key={ing.id} className="text-sm">
                 <span className="font-medium">{ing.name}</span>

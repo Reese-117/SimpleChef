@@ -1,6 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { useRecipeLibraryWebController } from '@/controllers';
+import { recipeService } from '@/lib/api';
+import type { RecipeListItemDto } from '@/lib/dto';
 import type { RecipeFilters } from '../types';
 import RecipeCard from '../components/RecipeCard';
 import { Input } from '../components/ui/input';
@@ -28,20 +30,52 @@ function difficultyForApi(d?: 'easy' | 'medium' | 'hard'): string {
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<RecipeFilters>({});
-
-  const tagsAll = useMemo(
-    () => (filters.tags && filters.tags.length > 0 ? filters.tags.join(',') : undefined),
-    [filters.tags]
-  );
+  const [allRecipes, setAllRecipes] = useState<RecipeListItemDto[]>([]);
 
   const library = useRecipeLibraryWebController({
     searchQuery,
     difficulty: difficultyForApi(filters.difficulty),
     maxTotalMinutes: filters.maxTime,
-    tagsAll,
   });
 
-  const availableTags = ['Vegetarian', 'Italian', 'Thai', 'Mediterranean', 'Healthy', 'Quick', 'Spicy'];
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const all = await recipeService.getAll({ limit: 500 });
+        if (!cancelled) setAllRecipes(all);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const availableTags = useMemo(() => {
+    const byLower = new Map<string, string>();
+    for (const r of allRecipes) {
+      for (const tag of r.tags || []) {
+        const raw = String(tag || '').trim();
+        if (!raw) continue;
+        const lower = raw.toLowerCase();
+        if (!byLower.has(lower)) byLower.set(lower, raw);
+      }
+    }
+    return Array.from(byLower.values()).sort((a, b) => a.localeCompare(b));
+  }, [allRecipes]);
+
+  const filteredRecipes = useMemo(() => {
+    const selected = (filters.tags || [])
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+    if (selected.length === 0) return library.recipes;
+    return library.recipes.filter((recipe) => {
+      const recipeTags = (recipe.tags || []).map((t) => String(t).trim().toLowerCase());
+      return selected.every((tag) => recipeTags.includes(tag));
+    });
+  }, [library.recipes, filters.tags]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -67,7 +101,7 @@ export default function Home() {
                   <Filter className="w-4 h-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent>
+              <SheetContent className="overflow-y-auto no-scrollbar">
                 <SheetHeader>
                   <SheetTitle>Filter Recipes</SheetTitle>
                   <SheetDescription>Refine your search with these filters</SheetDescription>
@@ -127,13 +161,16 @@ export default function Home() {
                         <div key={tag} className="flex items-center space-x-2">
                           <Checkbox
                             id={tag}
-                            checked={filters.tags?.includes(tag) || false}
+                            checked={(filters.tags || []).some((t) => t.toLowerCase() === tag.toLowerCase())}
                             onCheckedChange={(checked) => {
                               setFilters((prev) => ({
                                 ...prev,
                                 tags: checked
-                                  ? [...(prev.tags || []), tag]
-                                  : (prev.tags || []).filter((t) => t !== tag),
+                                  ? [...(prev.tags || []), tag].filter(
+                                      (v, i, arr) =>
+                                        arr.findIndex((x) => x.toLowerCase() === v.toLowerCase()) === i
+                                    )
+                                  : (prev.tags || []).filter((t) => t.toLowerCase() !== tag.toLowerCase()),
                               }));
                             }}
                           />
@@ -176,9 +213,9 @@ export default function Home() {
       <div className="max-w-screen-xl mx-auto px-4 py-6">
         {library.loading ? (
           <p className="text-center text-muted-foreground py-12">Loading recipes…</p>
-        ) : library.recipes.length > 0 ? (
+        ) : filteredRecipes.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {library.recipes.map((recipe) => (
+            {filteredRecipes.map((recipe) => (
               <RecipeCard key={recipe.id} recipe={recipe} />
             ))}
           </div>

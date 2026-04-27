@@ -154,14 +154,6 @@ export default function Auth() {
           </TabsContent>
         </Tabs>
 
-        <Card className="mt-4 bg-muted/50">
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground text-center">
-              Set <code className="text-foreground">VITE_API_URL</code> to your API base (e.g.{' '}
-              <code className="text-foreground">http://localhost:8000/api/v1</code>).
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

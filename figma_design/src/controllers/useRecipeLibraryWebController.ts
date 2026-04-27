@@ -13,7 +13,6 @@ export function useRecipeLibraryWebController({
   searchQuery,
   difficulty,
   maxTotalMinutes,
-  tagsAll,
 }: Options) {
   const [recipes, setRecipes] = useState<RecipeListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +34,6 @@ export function useRecipeLibraryWebController({
         q: debouncedQ.trim() || undefined,
         difficulty: difficulty.trim() || undefined,
         max_total_minutes: maxTotalMinutes,
-        tags_all: tagsAll?.trim() || undefined,
       });
       setRecipes(data);
     } catch (error) {
@@ -43,14 +41,14 @@ export function useRecipeLibraryWebController({
     } finally {
       setLoading(false);
     }
-  }, [debouncedQ, difficulty, maxTotalMinutes, tagsAll]);
+  }, [debouncedQ, difficulty, maxTotalMinutes]);
 
   useEffect(() => {
     loadRecipes();
   }, [loadRecipes]);
 
   const hasActiveFilters = Boolean(
-    debouncedQ.trim() || difficulty.trim() || maxTotalMinutes != null || tagsAll?.trim()
+    debouncedQ.trim() || difficulty.trim() || maxTotalMinutes != null
   );
 
   return {

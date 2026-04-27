@@ -60,7 +60,7 @@ export function CookingTimerDock() {
         </button>
 
         {timerDockExpanded && (
-          <div className="px-4 pb-4 space-y-2 max-h-48 overflow-auto">
+          <div className="px-4 pb-4 space-y-2 max-h-48 overflow-auto no-scrollbar">
             {timers.map((timer) => {
               const remaining = getTimerRemaining(timer);
               const isFinished = timer.status === 'completed';

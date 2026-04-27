@@ -62,10 +62,10 @@ A smart cooking assistant app.
    ```bash
    cd figma_design
    ```
-2. Set ENV variable:
+2. Set ENV variable (use your machine’s LAN IP when testing from a phone; `localhost` only works on the same device):
 ```bash
    touch .env
-   echo "VITE_API_URL=http://0.0.0.0:8000/api/v1" >> .env
+   echo "VITE_API_URL=http://127.0.0.1:8000/api/v1" >> .env
 ```
 3. Install dependencies:
    ```bash
@@ -75,6 +75,7 @@ A smart cooking assistant app.
    ```bash
    npm run dev
    ```
+5. **Demo on a phone (QR):** With `server.host: true`, the dev server prints a **QR code in the terminal** (similar to Expo) plus the **Network** URL. Scan it with the phone camera (same Wi‑Fi as your PC). For API calls from the phone, set `VITE_API_URL` in `figma_design/.env` to your computer’s **LAN** address, not `localhost` (for example `http://192.168.1.10:8000/api/v1`). For audiences outside your LAN, deploy the Vite build or use a tunnel (e.g. ngrok) and encode that HTTPS URL in a QR from any QR generator.
 
 ## Environment variables
 
