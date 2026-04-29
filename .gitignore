@@ -1,3 +1,5 @@
 */node_modules
 /.pytest_cache
 *.env
+
+docs/local_docs/

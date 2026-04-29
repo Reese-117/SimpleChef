@@ -58,7 +58,7 @@ Use this as a working backlog: **P0** = fix before wider testing / demo; **P1** 
 
 - [ ] **Image capture / upload** — still deferred.
 - [ ] **Video import (stretch)** — deferred.
-- [ ] **Manual form** — validation polish (title required), difficulty picker, `image_url` field optional.
+- [X] **Manual form** — validation polish (title required), difficulty picker, `image_url` field optional.
 - [x] **Edit existing recipe** from detail.
 
 ### Meal planner / calendar
@@ -85,8 +85,8 @@ Use this as a working backlog: **P0** = fix before wider testing / demo; **P1** 
 
 - [x] **`PATCH /users/me`** — `UserSelfUpdate` + profile form.
 - [x] **Profile UI** — comma dietary list, calorie goal, keep-awake toggle, save.
-- [ ] **Profile image upload** — URL field in API only; no upload pipeline.
-- [x] **Friends** — **explicitly out of scope** for this build (`user_friends` unused).
+- [X] **Profile image upload** — URL field in API only; no upload pipeline.
+- [ ] **Friends** — **explicitly out of scope** for this build (`user_friends` unused).
 
 ### Design system (proposal)
 
@@ -107,7 +107,7 @@ Use this as a working backlog: **P0** = fix before wider testing / demo; **P1** 
 ### Offline, performance, resilience
 
 - [ ] **Loading/error/retry** — partial (pull-to-refresh on recipe list); not every screen.
-- [x] **Grocery check** — optimistic with rollback on failure.
+- [ ] **Grocery check** — optimistic with rollback on failure.
 - [ ] **Image caching** — deferred (`expo-image` not wired on cards).
 
 ### Testing and dev experience
@@ -138,6 +138,3 @@ Use this as a working backlog: **P0** = fix before wider testing / demo; **P1** 
 | Profile | PATCH profile, theme colors |
 | Docs | `docs/ARCHITECTURE.md`, `docs/API.md`, tests, seed |
 
----
-
-*Last reviewed against repo state — update this file when scope changes.*
