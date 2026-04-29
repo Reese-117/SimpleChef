@@ -36,6 +36,7 @@ def read_recipes(
     """
     tags_list: Optional[List[str]] = None
     if tags_all and tags_all.strip():
+        # Normalize CSV input once so CRUD layer receives clean tag tokens.
         tags_list = [s.strip() for s in tags_all.split(",") if s.strip()]
     return crud.recipe.get_multi_for_user(
         db,
@@ -113,6 +114,7 @@ def update_recipe(
     recipe = crud.recipe.get(db=db, id=id)
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
+    # Owner-only mutation; visibility rules for reads are handled separately.
     if recipe.created_by_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return crud.recipe.update(db=db, db_obj=recipe, obj_in=recipe_in)

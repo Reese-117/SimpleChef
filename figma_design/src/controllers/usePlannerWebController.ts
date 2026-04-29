@@ -16,11 +16,6 @@ export function startOfMonthDate(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), 1);
 }
 
-/** @deprecated use startOfMonthDate to avoid clashing with date-fns name */
-export function startOfMonth(d: Date) {
-  return startOfMonthDate(d);
-}
-
 export function daysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }
@@ -41,6 +36,7 @@ export function parseISODateLocal(iso: string): Date {
 function useMonthGridCellWidth() {
   const [cell, setCell] = useState(44);
   useEffect(() => {
+    // Keep a minimum tap target while adapting to available width.
     const update = () => setCell(Math.max(36, Math.floor((window.innerWidth - 48) / 7)));
     update();
     window.addEventListener('resize', update);
@@ -89,6 +85,7 @@ export function usePlannerWebController() {
     let start = ws;
     let end = we;
     if (showFullMonth) {
+      // Expand to full calendar weeks so month view dots match visible cells.
       const mStart = startOfMonthDate(viewMonth);
       const mEnd = endOfMonth(viewMonth);
       const calS = startOfWeek(mStart, { weekStartsOn: 0 });
@@ -240,6 +237,7 @@ export function usePlannerWebController() {
 
     const scale = (v: number | null | undefined): number | undefined => {
       if (v == null || !Number.isFinite(Number(v))) return undefined;
+      // Planner stores per-meal rounded values for quick daily totals.
       return Math.max(0, Math.round(Number(v) * factor));
     };
 

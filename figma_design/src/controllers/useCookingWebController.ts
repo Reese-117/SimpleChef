@@ -35,6 +35,7 @@ export function useCookingWebController(recipeId: string | undefined) {
   }, [recipeId]);
 
   useEffect(() => {
+    // Reset transient step state when navigating to a different recipe.
     setCurrentStepIndex(0);
     setChecked({});
     loadRecipe();
@@ -56,14 +57,15 @@ export function useCookingWebController(recipeId: string | undefined) {
     return () => clearInterval(interval);
   }, [tick]);
 
-  const steps: StepDto[] = recipe?.steps || [];
-  const ingredients: IngredientDto[] = recipe?.ingredients || [];
+  const steps: StepDto[] = recipe?.steps ?? [];
+  const ingredients: IngredientDto[] = recipe?.ingredients ?? [];
   const currentStep = steps[currentStepIndex];
 
   const miseItems: IngredientDto[] = useMemo(() => {
     if (!currentStep) return [];
     const unlinked = ingredients.filter((i) => !i.step_id);
     const linked = ingredients.filter((i) => i.step_id === currentStep.id);
+    // Unlinked ingredients are treated as global prep and shown on step 1 only.
     const global = currentStepIndex === 0 ? unlinked : [];
     const map = new Map<number, IngredientDto>();
     [...global, ...linked].forEach((i) => map.set(i.id, i));
@@ -77,12 +79,12 @@ export function useCookingWebController(recipeId: string | undefined) {
   const isLastStep = steps.length > 0 && currentStepIndex === steps.length - 1;
 
   const nextStep = () => {
-    if (!isLastStep) setCurrentStepIndex(currentStepIndex + 1);
+    if (!isLastStep) setCurrentStepIndex((prev) => prev + 1);
     else navigate(-1);
   };
 
   const prevStep = () => {
-    if (currentStepIndex > 0) setCurrentStepIndex(currentStepIndex - 1);
+    setCurrentStepIndex((prev) => Math.max(0, prev - 1));
   };
 
   const handleStartTimer = () => {

@@ -31,6 +31,7 @@ export function useSignupWebController() {
       return;
     }
     try {
+      // Auto-login keeps signup and first session as a single flow.
       const data = await authService.login(email, password);
       await setToken(data.access_token);
     } catch {

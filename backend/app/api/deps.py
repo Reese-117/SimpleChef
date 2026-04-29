@@ -25,6 +25,7 @@ def get_current_user(
     token: str = Depends(reusable_oauth2)
 ) -> models.User:
     try:
+        # Decode and shape-validate JWT payload before touching the database.
         payload = jwt.decode(
             token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM]
         )

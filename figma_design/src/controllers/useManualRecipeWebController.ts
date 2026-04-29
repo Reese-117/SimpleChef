@@ -140,6 +140,7 @@ export function useManualRecipeWebController(
         console.error(e);
         if (!cancelled) setSnackbar('Could not load recipe for editing.');
       } finally {
+        // Prevent state updates after unmount or route change during async fetch.
         if (!cancelled) setLoadRecipeLoading(false);
       }
     })();
@@ -209,6 +210,7 @@ export function useManualRecipeWebController(
             name: i.name,
             quantity: parseFloat(String(i.quantity)) || 0,
             unit: i.unit || null,
+            // API resolves this 1-based index to step_id after steps are persisted.
             step_order_index:
               parsedStep !== undefined && !Number.isNaN(parsedStep) ? parsedStep : undefined,
           };

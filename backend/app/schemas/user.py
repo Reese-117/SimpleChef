@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 class UserBase(BaseModel):
     email: Optional[EmailStr] = None
@@ -8,7 +8,7 @@ class UserBase(BaseModel):
     profile_image_url: Optional[str] = None
     is_screen_always_on: bool = True
     calorie_goal: Optional[int] = 2000
-    dietary_restrictions: List[str] = []
+    dietary_restrictions: List[str] = Field(default_factory=list)
 
 class UserCreate(UserBase):
     email: EmailStr
@@ -31,8 +31,7 @@ class UserSelfUpdate(BaseModel):
 class UserInDBBase(UserBase):
     id: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class User(UserInDBBase):
     pass

@@ -19,6 +19,7 @@ export function useRecipeLibraryWebController({
   const [debouncedQ, setDebouncedQ] = useState('');
 
   useEffect(() => {
+    // Debounce to reduce request spam while the user is typing.
     if (searchQuery === '') {
       setDebouncedQ('');
       return;
@@ -48,6 +49,7 @@ export function useRecipeLibraryWebController({
   }, [loadRecipes]);
 
   const hasActiveFilters = Boolean(
+    // Use the debounced value so UI state matches the query currently sent to the API.
     debouncedQ.trim() || difficulty.trim() || maxTotalMinutes != null
   );
 

@@ -22,6 +22,7 @@ export function useRecipeDetailWebController(recipeId: string | undefined) {
     if (!recipeId) return;
     setLoading(true);
     try {
+      // Load user + recipe together so ownership checks can render immediately.
       const [data, user] = await Promise.all([
         recipeService.getById(Number(recipeId)),
         userService.getMe().catch(() => null),
@@ -50,6 +51,7 @@ export function useRecipeDetailWebController(recipeId: string | undefined) {
         date: planDate,
         meal_type: mealType,
         recipe_id: recipe.id,
+        // Copying title/calories to meal rows keeps planner cards stable if recipe changes later.
         calories: recipe.total_calories ?? undefined,
         custom_food_name: recipe.title,
       });

@@ -31,6 +31,7 @@ export function useProfileWebController() {
     } catch {
       setSnackbar('Could not load profile.');
     } finally {
+      // Always clear loading so the screen does not get stuck after an error.
       setLoading(false);
     }
   }, [token]);

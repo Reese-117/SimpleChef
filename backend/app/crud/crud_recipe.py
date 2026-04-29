@@ -80,10 +80,11 @@ class CRUDRecipe:
         obj_in_data = jsonable_encoder(obj_in)
         ingredients_data = obj_in_data.pop("ingredients", [])
         steps_data = obj_in_data.pop("steps", [])
-        
+
         db_obj = Recipe(**obj_in_data, created_by_id=owner_id)
         db.add(db_obj)
-        db.commit() # Commit to get ID
+        # Persist first so child Step/Ingredient rows can reference recipe_id.
+        db.commit()
         db.refresh(db_obj)
 
         for step in steps_data:

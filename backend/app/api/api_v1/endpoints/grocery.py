@@ -13,6 +13,11 @@ from app.services.grocery_from_plan import aggregate_for_range
 router = APIRouter()
 
 
+def _normalized_item_key(name: str, unit: str | None) -> tuple[str, str]:
+    # Shared normalization keeps dedupe behavior consistent across merge paths.
+    return (name.strip().lower(), (unit or "").strip().lower())
+
+
 def _get_or_create_list(db: Session, user_id: int) -> GroceryList:
     g_list = (
         db.query(GroceryList)
@@ -129,18 +134,16 @@ def merge_grocery_from_plan(
         start_date=start_date,
         end_date=end_date,
     )
-    index = {
-        (i.name.strip().lower(), (i.unit or "").strip().lower()): i
-        for i in g_list.items
-    }
+    index = {_normalized_item_key(item.name, item.unit): item for item in g_list.items}
     for row in rows:
-        key = (row["name"].strip().lower(), (row["unit"] or "").strip().lower())
+        key = _normalized_item_key(row["name"], row.get("unit"))
         qty = row.get("quantity") or 0.0
         if key in index:
-            ex = index[key]
-            ex.quantity = (ex.quantity or 0) + float(qty)
-            if row.get("category") and ex.category == "Uncategorized":
-                ex.category = row["category"]
+            existing_item = index[key]
+            # Existing rows are incremented instead of duplicated.
+            existing_item.quantity = (existing_item.quantity or 0) + float(qty)
+            if row.get("category") and existing_item.category == "Uncategorized":
+                existing_item.category = row["category"]
         else:
             it = GroceryItem(
                 grocery_list_id=g_list.id,

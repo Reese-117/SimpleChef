@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 # Ingredient Schemas
 class IngredientBase(BaseModel):
@@ -17,8 +17,7 @@ class Ingredient(IngredientBase):
     recipe_id: int
     step_id: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Step Schemas
 class StepBase(BaseModel):
@@ -33,8 +32,7 @@ class Step(StepBase):
     id: int
     recipe_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Recipe Schemas
 class RecipeBase(BaseModel):
@@ -53,8 +51,8 @@ class RecipeBase(BaseModel):
     tags: List[str] = Field(default_factory=list)
 
 class RecipeCreate(RecipeBase):
-    ingredients: List[IngredientCreate] = []
-    steps: List[StepCreate] = []
+    ingredients: List[IngredientCreate] = Field(default_factory=list)
+    steps: List[StepCreate] = Field(default_factory=list)
 
 class RecipeUpdate(BaseModel):
     title: Optional[str] = None
@@ -76,8 +74,7 @@ class RecipeUpdate(BaseModel):
 class Recipe(RecipeBase):
     id: int
     created_by_id: Optional[int] = None
-    ingredients: List[Ingredient] = []
-    steps: List[Step] = []
+    ingredients: List[Ingredient] = Field(default_factory=list)
+    steps: List[Step] = Field(default_factory=list)
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

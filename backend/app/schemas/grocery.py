@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 class GroceryItemBase(BaseModel):
     name: str
@@ -22,12 +22,10 @@ class GroceryItem(GroceryItemBase):
     id: int
     grocery_list_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class GroceryList(BaseModel):
     id: int
-    items: List[GroceryItem] = []
+    items: List[GroceryItem] = Field(default_factory=list)
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

@@ -36,6 +36,7 @@ export function useGroceryWebController() {
   const toggleItem = async (id: number, currentStatus: boolean) => {
     const next = !currentStatus;
     const prevItems = items;
+    // Optimistic toggle keeps checklist interactions responsive.
     const optimistic = items.map((i) => (i.id === id ? { ...i, is_checked: next } : i));
     setItems(optimistic);
     setSections(groupItems(optimistic));
@@ -43,6 +44,7 @@ export function useGroceryWebController() {
       await groceryService.updateItem(id, { is_checked: next });
     } catch (error) {
       console.error(error);
+      // Roll back if server write fails.
       setItems(prevItems);
       setSections(groupItems(prevItems));
     }
@@ -51,6 +53,7 @@ export function useGroceryWebController() {
   const mergeFromPlan = async (daysForward = 7) => {
     const start = new Date();
     const end = new Date();
+    // Guard against invalid/negative values from UI inputs.
     const safeDays = Number.isFinite(daysForward) ? Math.max(1, Math.floor(daysForward)) : 7;
     end.setDate(start.getDate() + safeDays);
     const fmt = (d: Date) => d.toISOString().split('T')[0];

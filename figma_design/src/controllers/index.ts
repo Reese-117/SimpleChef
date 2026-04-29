@@ -6,7 +6,7 @@ export {
   usePlannerWebController,
   MEAL_TYPES,
   MEAL_TYPE_DOT_COLORS,
-  startOfMonth,
+  startOfMonthDate as startOfMonth,
   daysInMonth,
   toISODate,
   parseISODateLocal,

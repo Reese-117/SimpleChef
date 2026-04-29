@@ -11,6 +11,7 @@ from app.models.recipe import Recipe
 
 
 def _category_guess(name: str) -> str:
+    # Lightweight keyword categorization used only for default sectioning.
     n = name.lower()
     if any(x in n for x in ("milk", "cheese", "yogurt", "cream", "butter")):
         return "Dairy"
@@ -71,6 +72,7 @@ def aggregate_for_range(
             key = (display.lower(), (ing.unit or "").strip().lower())
             q = float(ing.quantity or 0)
             entry = merged[key]
+            # Merge by normalized name+unit so repeated ingredients collapse into one row.
             entry["quantity"] += q
             entry["display_name"] = display
             entry["unit"] = ing.unit
