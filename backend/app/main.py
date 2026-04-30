@@ -8,9 +8,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://simple-chef.vercel.app",
-        "https://simple-chef-5jzgfhhb4-reese-117s-projects.vercel.app",
         "http://localhost:5173"
     ],
+    allow_origin_regex="https://simple-chef-.*\\.vercel\\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
