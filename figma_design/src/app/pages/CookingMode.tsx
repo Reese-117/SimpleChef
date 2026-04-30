@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import { RouterLink } from '../components/RouterLink';
 import { useCookingWebController } from '@/controllers';
-import { CookingTimerDock } from '@/components/CookingTimerDock';
+import { CookingTimerDock } from '../components/CookingTimerDock';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Checkbox } from '../components/ui/checkbox';

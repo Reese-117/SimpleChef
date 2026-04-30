@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Clock, Pause, Play, X } from 'lucide-react';
-import { Button } from '@/app/components/ui/button';
+import { Button } from './ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/app/components/ui/dialog';
+} from './ui/dialog';
 import { useTimerStore, type Timer } from '@/lib/useTimerStore';
 
 function formatTime(seconds: number) {

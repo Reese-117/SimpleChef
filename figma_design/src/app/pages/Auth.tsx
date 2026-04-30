@@ -60,7 +60,7 @@ export default function Auth() {
             <ChefHat className="w-8 h-8" />
           </div>
           <h1 className="mb-2">SimpleChef</h1>
-          <p className="text-muted-foreground">Sign in with your SimpleChef account (same API as the Expo app).</p>
+          <p className="text-muted-foreground">Sign in with your SimpleChef account.</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'login' | 'signup')}>
