@@ -6,6 +6,7 @@ app = FastAPI(title="SimpleChef API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://simple-chef.vercel.app",
         "https://simple-chef-5jzgfhhb4-reese-117s-projects.vercel.app",
         "http://localhost:5173"
     ],
